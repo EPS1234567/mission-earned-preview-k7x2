@@ -253,6 +253,16 @@
       scrollTo(firstInvalid);
       return false;
     }
+
+    /* Everything was checked trimmed, so store it trimmed too rather than
+       filing a name or address padded with stray spaces. Done here, at
+       submit, and never while typing — mid-word spaces must survive. */
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach(
+      function (input) {
+        var trimmed = input.value.trim();
+        if (input.value !== trimmed) input.value = trimmed;
+      }
+    );
     return true;
   }
 
