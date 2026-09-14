@@ -7,25 +7,25 @@
 /* ---- Fonts (self-hosted) ------------------------------------------------ */
 @font-face {
   font-family: "Bebas Neue";
-  src: url("/assets/fonts/bebas-neue-400.woff2") format("woff2");
+  src: url("../fonts/bebas-neue-400.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Montserrat";
-  src: url("/assets/fonts/montserrat-var.woff2") format("woff2");
+  src: url("../fonts/montserrat-var.woff2") format("woff2");
   font-weight: 100 900;
   font-display: swap;
 }
 @font-face {
   font-family: "Lato";
-  src: url("/assets/fonts/lato-400.woff2") format("woff2");
+  src: url("../fonts/lato-400.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Lato";
-  src: url("/assets/fonts/lato-700.woff2") format("woff2");
+  src: url("../fonts/lato-700.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
 }
@@ -824,6 +824,12 @@ a.card:hover {
   border-color: var(--red);
   background: #fdf3f4;
 }
+.choice input[aria-invalid="true"],
+.field input[type="checkbox"][aria-invalid="true"],
+.field input[type="radio"][aria-invalid="true"] {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
 .field__error {
   display: none;
   font-size: 0.82rem;
@@ -870,6 +876,18 @@ a.card:hover {
 .choice--inline {
   display: inline-flex;
   margin-right: 1.6rem;
+}
+@media (pointer: coarse) {
+  .choice {
+    padding-block: 0.35rem;
+  }
+  .choice input {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .sig-clear {
+    padding: 0.6rem 0;
+  }
 }
 fieldset.field,
 fieldset.field--full {
@@ -1589,6 +1607,17 @@ legend.field__label {
   font-size: 1.5rem;
   white-space: nowrap;
 }
+/* On a narrow screen the heading must be allowed to wrap — held on one line
+   it pushes the whole page sideways. */
+@media (max-width: 30rem) {
+  .rule-heading {
+    gap: 0.75rem;
+  }
+  .rule-heading h2 {
+    white-space: normal;
+    font-size: 1.25rem;
+  }
+}
 
 /* ---------- Application section cards ---------- */
 .form-cards {
@@ -1684,9 +1713,10 @@ legend.field__label {
   opacity: 0;
   cursor: pointer;
 }
-.dropzone input[type="file"]:focus-visible {
+.dropzone:focus-within {
   outline: var(--focus-ring);
   outline-offset: 2px;
+  border-color: var(--navy);
 }
 .dropzone .icon {
   color: var(--steel-text);
@@ -1704,6 +1734,9 @@ legend.field__label {
   color: var(--steel-text);
   margin-top: 0.25rem;
 }
+.dropzone__file--error {
+  color: var(--red-dark);
+}
 .dropzone__file {
   display: block;
   margin-top: 0.6rem;
@@ -1714,11 +1747,23 @@ legend.field__label {
 }
 
 /* ---------- Agreements ---------- */
+fieldset.agreements {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.agreements .agreement {
+  margin-bottom: 0.75rem;
+}
 .agreements .choice {
   align-items: flex-start;
-  margin-bottom: 0.75rem;
   font-size: 0.88rem;
   line-height: 1.45;
+}
+.agreements .field__error {
+  margin-top: 0.3rem;
+  margin-left: 1.75rem;
 }
 
 /* ---------- Signature pad ---------- */
@@ -1731,7 +1776,7 @@ legend.field__label {
   border: 1px solid var(--silver);
   border-radius: var(--radius);
   background: var(--white);
-  touch-action: none;
+  touch-action: pan-y;
   cursor: crosshair;
   display: block;
 }
@@ -1747,6 +1792,28 @@ legend.field__label {
   font-size: 1.1rem;
   color: var(--steel-text);
   pointer-events: none;
+}
+.sig-typed {
+  margin-top: 0.75rem;
+}
+.sig-typed .field__label {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.sig-typed input {
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--white);
+  border: 1px solid #b9c2c9;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.85rem;
+  width: 100%;
+}
+.sig-typed input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 0;
+  border-color: transparent;
 }
 .sig-actions {
   display: flex;
@@ -1771,6 +1838,12 @@ legend.field__label {
 .sig-hint {
   font-size: 0.78rem;
   color: var(--steel-text);
+}
+
+.btn.is-busy,
+.btn[aria-disabled="true"] {
+  opacity: 0.65;
+  cursor: progress;
 }
 
 /* ---------- Submit area ---------- */
@@ -1812,14 +1885,16 @@ legend.field__label {
 .form-card .form-grid > fieldset.field {
   grid-column: span 6;
 }
-.form-card .form-grid > .field--half {
-  grid-column: span 3;
-}
-.form-card .form-grid > .field--third {
-  grid-column: span 2;
-}
-.form-card .form-grid > .field--row-start {
-  grid-column-start: 1;
+@media (min-width: 48em) {
+  .form-card .form-grid > .field--half {
+    grid-column: span 3;
+  }
+  .form-card .form-grid > .field--third {
+    grid-column: span 2;
+  }
+  .form-card .form-grid > .field--row-start {
+    grid-column-start: 1;
+  }
 }
 /* Checkbox lists read as a single column in a narrow card. */
 .form-card .choice-grid {
@@ -1835,11 +1910,13 @@ legend.field__label {
 }
 
 /* A bare grid-column-start would cancel the span above, so state both. */
-.form-card .form-grid > .field--half.field--row-start {
-  grid-column: 1 / span 3;
-}
-.form-card .form-grid > .field--third.field--row-start {
-  grid-column: 1 / span 2;
+@media (min-width: 48em) {
+  .form-card .form-grid > .field--half.field--row-start {
+    grid-column: 1 / span 3;
+  }
+  .form-card .form-grid > .field--third.field--row-start {
+    grid-column: 1 / span 2;
+  }
 }
 
 /* ==========================================================================
