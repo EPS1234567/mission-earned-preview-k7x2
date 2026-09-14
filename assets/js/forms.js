@@ -3,10 +3,10 @@
  * Any <form data-validate> gets:
  *  - required/format validation with inline aria-live error messages
  *  - honeypot spam check (input[name="botcheck"] must stay empty)
- *  - submission to Web3Forms when the form (or body) carries a
- *    data-w3f-key; otherwise an honest "temporarily unavailable" failure
- *    state with phone/email fallback. Entered data is never cleared on
- *    failure, never logged, and never placed in the URL.
+ *  - submission to the Mission Earned service as multipart/form-data, so an
+ *    attached resume travels with the answers rather than only its name.
+ *    Entered data is never cleared on failure, never logged, never placed in
+ *    the URL, and never kept in this browser.
  *
  * Validation only speaks up once a field has actually been used, or once the
  * applicant has pressed Submit. Tabbing through the form to read it never
@@ -293,140 +293,60 @@
     }
   }
 
-  function submitWeb3Forms(form, key) {
-    var data = new FormData(form);
-    data.append("access_key", key);
-    data.append("from_name", "missionearned.org website");
+  /* Send the application to the Mission Earned service.
+   *
+   * multipart/form-data rather than JSON, so the resume file itself travels
+   * with the answers instead of only its name. No cookies are sent: this is a
+   * public, unauthenticated create, and the endpoint must never see one. */
+  function submitToApi(form) {
+    var base = (window.ME && window.ME.apiBase) || "";
+    if (!base) return Promise.resolve({ ok: false, reason: "not_configured" });
 
-    return fetch("https://api.web3forms.com/submit", {
+    return fetch(base.replace(/\/$/, "") + "/api/v1/applications", {
       method: "POST",
-      body: data,
-      headers: { Accept: "application/json" },
-      signal: timeoutSignal(20000),
+      body: new FormData(form),
+      credentials: "omit",
+      headers: { "Idempotency-Key": form.dataset.idempotencyKey },
     })
       .then(function (res) {
-        return res.json().then(function (json) {
-          return { ok: res.ok && json.success };
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          if (res.ok) return { ok: true, reference: body.reference, duplicate: body.duplicate };
+          if (res.status === 422) return { ok: false, reason: "validation", errors: body.errors || [] };
+          if (res.status === 429) return { ok: false, reason: "rate_limited", message: body.message };
+          return { ok: false, reason: "server", message: body.message };
         });
       })
       .catch(function () {
-        return { ok: false };
+        return { ok: false, reason: "network" };
       });
   }
 
-  /* Never let a stalled network strand the applicant on a dead
-     "Submitting…" button. */
-  function timeoutSignal(ms) {
-    try {
-      if (AbortSignal && typeof AbortSignal.timeout === "function") {
-        return AbortSignal.timeout(ms);
-      }
-      var c = new AbortController();
-      setTimeout(function () {
-        c.abort();
-      }, ms);
-      return c.signal;
-    } catch (e) {
-      return undefined;
-    }
+  /* Generated once per page load and reused across retries, so pressing the
+     button twice or retrying after a timeout files one application. */
+  function idempotencyKey() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return String(Date.now()) + "-" + Math.random().toString(36).slice(2);
   }
 
-  /* Append the submission to a Google Sheet via an Apps Script web app.
-     Sent as text/plain to avoid a CORS preflight Apps Script won't answer;
-     the response is opaque, so a completed request counts as delivered.
-     Email remains the primary channel — a sheet failure never blocks it. */
-  function submitToSheet(form, url) {
-    var payload = collect(form);
-    payload._form = form.dataset.sheetName || document.title;
-    payload._submitted_at = new Date().toISOString();
-
-    return fetch(url, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-      signal: timeoutSignal(20000),
-    })
-      .then(function () {
-        return { ok: true };
-      })
-      .catch(function () {
-        return { ok: false };
-      });
-  }
-
-  function collect(form) {
-    var data = {};
-    new FormData(form).forEach(function (value, key) {
-      if (key === "botcheck" || key === "access_key") return;
-      /* File objects don't serialise usefully — record the name instead. */
-      if (typeof File !== "undefined" && value instanceof File) {
-        if (!value.name) return;
-        value = value.name;
-      }
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        data[key] = [].concat(data[key], value).join(", ");
-      } else {
-        data[key] = value;
-      }
+  /* Errors the server found that the browser did not: show them on the field
+     they belong to, the same way local validation does. */
+  function applyServerErrors(form, errors) {
+    var first = null;
+    errors.forEach(function (e) {
+      var input = form.querySelector('[name="' + e.field + '"]');
+      if (!input) return;
+      setError(input, e.message);
+      if (!first) first = input;
     });
-    return data;
-  }
-
-  /* Keep a copy of each successful submission in this browser so the admin
-     portal can show it during a test run. This is local to the device that
-     submitted — the Google Sheet is the shared, durable record.
-     Returns whether the copy was actually written. */
-  function storeLocally(form) {
-    try {
-      var entry = {
-        id: String(Date.now()) + "-" + Math.floor(Math.random() * 100000),
-        form: form.dataset.sheetName || document.title,
-        submitted_at: new Date().toISOString(),
-        status: "new",
-        data: collect(form),
-      };
-
-      var all = [];
-      try {
-        all = JSON.parse(localStorage.getItem("me_submissions") || "[]");
-      } catch (e) {
-        all = [];
+    if (first) {
+      if (first.type === "hidden" && first.dataset.focusTarget) {
+        var proxy = document.querySelector(first.dataset.focusTarget);
+        if (proxy) first = proxy;
       }
-      if (!Array.isArray(all)) all = [];
-      all.unshift(entry);
-      /* Signatures are sizeable; keep the 50 most recent. unshift() puts the
-         newest first, so the oldest are the ones at the end. */
-      while (all.length > 50) all.pop();
-      localStorage.setItem("me_submissions", JSON.stringify(all));
-      return true;
-    } catch (e) {
-      /* Storage unavailable or full. The caller decides what to tell the
-         applicant — it must never be reported as a successful filing. */
-      return false;
+      first.focus({ preventScroll: true });
+      scrollTo(first);
     }
-  }
-
-  /* Shared submissions API provided by the preview server. Lets the review
-     portal show the same applications on every device, instead of only the
-     browser that submitted. Resolves false if no API is present. */
-  function postToApi(form) {
-    return fetch("../api/submissions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({
-        form: form.dataset.sheetName || document.title,
-        data: collect(form),
-      }),
-      signal: timeoutSignal(15000),
-    })
-      .then(function (r) {
-        return r.ok;
-      })
-      .catch(function () {
-        return false;
-      });
+    return Boolean(first);
   }
 
   /* A signature can't be dated in the future, and a start date can't be in
@@ -449,6 +369,7 @@
 
   document.querySelectorAll("form[data-validate]").forEach(function (form) {
     form.setAttribute("novalidate", "novalidate");
+    form.dataset.idempotencyKey = idempotencyKey();
 
     function live() {
       return form.dataset.submitted === "true";
@@ -508,7 +429,7 @@
         return;
       }
 
-      var mode = form.dataset.mode || "web3forms";
+      var mode = form.dataset.mode || "api";
 
       if (mode === "account") {
         /* Account creation has no backend yet (open decision — see README).
@@ -524,80 +445,56 @@
         return;
       }
 
-      var key = form.dataset.w3fKey || document.body.dataset.w3fKey || "";
-      var sheetUrl = form.dataset.sheetUrl || document.body.dataset.sheetUrl || "";
-
       function contactFallback() {
         return (
-          "please call " + (form.dataset.phone || "(833) 674‑6387") +
+          "please call " + (form.dataset.phone || "(833) 674\u20116387") +
           " or email " + (form.dataset.email || "info@missionearned.org") +
           " and we'll take care of you directly."
         );
       }
 
-      function finish(delivered, successMessage) {
+      form.dataset.busy = "true";
+      setBusy(form, true);
+
+      submitToApi(form).then(function (result) {
         form.dataset.busy = "false";
         setBusy(form, false);
-        if (delivered) {
+
+        if (result.ok) {
           resetForm(form);
-          showStatus(form, "success", successMessage, true);
-        } else {
           showStatus(
             form,
-            "error",
-            "We couldn't record your application just now. Your entries are unchanged — " +
-              "please try again, or " + contactFallback(),
+            "success",
+            (form.dataset.successMessage ||
+              "Thank you for your interest in volunteering with Mission Earned! Your application was received and we'll be in touch soon.") +
+              (result.reference ? " Your reference is " + result.reference + "." : ""),
             true
           );
+          return;
         }
-      }
 
-      /* Preview capture: with no email/sheet wired up yet, record the
-         submission straight into the review portal on this device. Only
-         enabled while the site is in preview mode, and the form says so
-         on screen — so this can never masquerade as a live pipeline. */
-      var demoCapture = form.hasAttribute("data-demo-capture");
-      if (!key && !sheetUrl && demoCapture) {
-        form.dataset.busy = "true";
-        setBusy(form, true);
-        var storedLocally = storeLocally(form);
-        postToApi(form).then(function (sentToApi) {
-          /* Only claim it was filed if it actually landed somewhere. */
-          finish(
-            storedLocally || sentToApi,
-            form.dataset.demoMessage || "Application received. It's now in the review portal."
-          );
-        });
-        return;
-      }
-
-      /* Nowhere to deliver it — say so rather than pretending it sent. */
-      if (!key && !sheetUrl) {
+        /* Everything below keeps every answer on the page. A veteran who has
+           just filled in forty fields must never be made to do it again. */
+        if (result.reason === "validation" && result.errors.length) {
+          if (applyServerErrors(form, result.errors)) {
+            showStatus(form, "error", "Please fix the highlighted fields and try again. Your entries have been kept.", false);
+            return;
+          }
+        }
+        if (result.reason === "rate_limited") {
+          showStatus(form, "error", result.message || ("We've already had a submission for that email today. Your entries are unchanged \u2014 " + contactFallback()), true);
+          return;
+        }
+        if (result.reason === "not_configured") {
+          showStatus(form, "error", "Online submission isn't switched on yet. Your entries are unchanged \u2014 " + contactFallback(), true);
+          return;
+        }
         showStatus(
           form,
           "error",
-          "Online submission isn't available just yet. Your entries are unchanged — " + contactFallback(),
+          "We couldn't send your application just now \u2014 this is our problem, not yours. " +
+            "Your answers are all still here, so please press Submit again in a moment, or " + contactFallback(),
           true
-        );
-        return;
-      }
-
-      /* Deliver to every configured destination; the submission counts as
-         received if any of them accepts it. */
-      form.dataset.busy = "true";
-      setBusy(form, true);
-      Promise.all([
-        key ? submitWeb3Forms(form, key) : Promise.resolve({ ok: false }),
-        sheetUrl ? submitToSheet(form, sheetUrl) : Promise.resolve({ ok: false }),
-      ]).then(function (results) {
-        var ok = results.some(function (r) {
-          return r && r.ok;
-        });
-        if (ok) storeLocally(form);
-        finish(
-          ok,
-          form.dataset.successMessage ||
-            "Thank you — your submission was received. Our team will follow up with you soon."
         );
       });
     });

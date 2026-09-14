@@ -86,109 +86,19 @@
   <main id="main">
     
 
-<div data-admin="" data-passcode="ME-staff-2026">
-
-  <div class="admin-bar">
-    <div class="container admin-bar__inner">
-      <h1>
-<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>
- Applications</h1>
-      <div class="admin-bar__meta">
-        <span data-admin-count="">—</span>
-      </div>
+<section class="section">
+  <div class="container">
+    <div class="card admin-gate">
+      <h2>The review portal has moved</h2>
+      <div class="rule"></div>
+      <p>Applications are no longer held in this browser. They live in the Mission Earned
+         staff portal, behind a real sign-in.</p>
+      <p><a class="btn btn--navy btn--block" href="https://app.missionearned.org/staff/">Go to the staff portal</a></p>
+      <p class="fine-print">If you don't have an account yet, ask an administrator to create one for you.
+         The old shared passcode no longer works anywhere and should be considered public.</p>
     </div>
   </div>
-
-  
-  <section class="section" data-admin-gate="">
-    <div class="container">
-      <div class="card admin-gate">
-        <h2>Staff Sign In</h2>
-        <div class="rule"></div>
-        <p>Enter the staff passcode to review submitted applications.</p>
-        <form data-admin-gate-form="" novalidate="">
-          <div class="field">
-            <label class="field__label" for="admin-passcode">Passcode</label>
-            <input type="password" id="admin-passcode" autocomplete="current-password" data-admin-passcode="">
-            <p class="field__error is-visible" aria-live="polite" data-admin-gate-error=""></p>
-          </div>
-          <button class="btn btn--navy btn--block" type="submit">Sign In</button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  
-  <section class="section admin-hidden" data-admin-app="">
-    <div class="container">
-
-      <p class="admin-notice">
-        <strong>Preview portal.</strong> Applications are read from
-        <span data-admin-source="">the shared preview store</span>
-        Names shown are sample applications for this walkthrough — real ones appear the same way.
-        This passcode screen keeps the page tidy; it is not production access control.
-      </p>
-
-      <div class="admin-stats">
-        <div class="stat-tile stat-tile--red">
-          <div class="stat-tile__num" data-stat-new="">0</div>
-          <div class="stat-tile__label">Needs Review</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-tile__num" data-stat-total="">0</div>
-          <div class="stat-tile__label">Total Applications</div>
-        </div>
-        <div class="stat-tile stat-tile--gold">
-          <div class="stat-tile__num" data-stat-today="">0</div>
-          <div class="stat-tile__label">Received Today</div>
-        </div>
-      </div>
-
-      
-      <div data-admin-list="">
-        <div class="admin-toolbar">
-          <label class="visually-hidden" for="admin-search">Search applications</label>
-          <input type="search" id="admin-search" placeholder="Search name, email, anything…" data-admin-search="">
-          <label class="visually-hidden" for="admin-filter">Filter by status</label>
-          <select id="admin-filter" data-admin-filter="">
-            <option value="all">All statuses</option>
-            <option value="new">Needs review</option>
-            <option value="reviewed">Reviewed</option>
-          </select>
-          <button class="btn btn--outline btn--xs" type="button" data-export="">Export CSV</button>
-        </div>
-
-        <div class="app-table-wrap">
-          <table class="app-table">
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Connection</th>
-                <th scope="col">Received</th>
-                <th scope="col">Status</th>
-                <th scope="col"><span class="visually-hidden">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody data-admin-rows=""></tbody>
-          </table>
-        </div>
-
-        <div class="admin-empty" data-admin-empty="">
-          
-<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>
-
-          <p><strong>No applications yet.</strong></p>
-          <p>Submit the <a href="/mission-earned-preview-k7x2/volunteer/">volunteer application</a> in this browser and it will appear here straight away.</p>
-        </div>
-      </div>
-
-      
-      <div class="admin-hidden" tabindex="-1" data-admin-detail=""></div>
-
-    </div>
-  </section>
-</div>
+</section>
 
   </main>
   
@@ -303,7 +213,6 @@
 
   <script src="/mission-earned-preview-k7x2/assets/js/main.js" defer=""></script>
   
-  <script src="/mission-earned-preview-k7x2/assets/js/admin.js" defer=""></script>
   
 </body>
 </html>
