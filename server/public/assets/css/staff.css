@@ -1,0 +1,92 @@
+/* Staff review portal. Built on the site's design system. */
+
+.case-grid { display: grid; gap: 1.5rem; align-items: start; }
+@media (min-width: 60rem) {
+  .case-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+
+.case-section { margin-bottom: 2rem; }
+.case-section > h3 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--red);
+  border-bottom: 2px solid var(--navy);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.case-thread, .case-notes { list-style: none; margin: 0 0 1rem; padding: 0; }
+.case-msg, .case-notes li {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius);
+  margin-bottom: 0.6rem;
+  background: var(--cloud);
+  border-left: 4px solid var(--silver);
+}
+.case-msg--us   { border-left-color: var(--navy); }
+.case-msg--them { border-left-color: var(--red); background: #fdf6f7; }
+.case-notes li  { border-left-color: var(--gold); background: #fdf9ef; }
+.case-msg__who { margin: 0 0 0.25rem; font-family: var(--font-heading); font-weight: 700; font-size: 0.8rem; color: var(--navy); }
+.case-msg__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.case-composer { display: grid; gap: 0.5rem; justify-items: start; }
+.case-composer textarea {
+  width: 100%; font: inherit; font-size: 0.95rem;
+  border: 1px solid #b9c2c9; border-radius: var(--radius); padding: 0.6rem 0.75rem;
+}
+.case-composer textarea:focus-visible { outline: var(--focus-ring); border-color: transparent; }
+
+.case-actions { display: grid; gap: 1rem; margin-top: 1rem; }
+@media (min-width: 48rem) { .case-actions { grid-template-columns: 1fr 1fr; } }
+.case-actions h4 { margin: 0 0 0.6rem; font-size: 0.9rem; }
+.case-actions input[type="text"], .case-actions textarea, .case-actions input[type="file"] {
+  width: 100%; font: inherit; font-size: 0.92rem;
+  border: 1px solid #b9c2c9; border-radius: var(--radius); padding: 0.5rem 0.65rem; background: var(--white);
+}
+
+.case-docs { list-style: none; margin: 0; padding: 0; }
+.case-docs li { padding: 0.45rem 0; border-bottom: 1px solid var(--silver); overflow-wrap: anywhere; }
+
+.case-side .card { margin-bottom: 1rem; }
+.case-side h3 { font-size: 0.9rem; margin: 0 0 0.6rem; }
+.case-side select {
+  width: 100%; font: inherit; padding: 0.5rem 0.65rem;
+  border: 1px solid #b9c2c9; border-radius: var(--radius); background: var(--white);
+}
+.case-history { list-style: none; margin: 0; padding: 0; font-size: 0.88rem; }
+.case-history li { padding: 0.3rem 0; border-bottom: 1px solid var(--silver); }
+
+/* Unread count must not rely on colour alone. */
+.badge-unread {
+  display: inline-block; min-width: 1.35rem; padding: 0.05rem 0.4rem;
+  border-radius: 999px; background: var(--red); color: var(--white);
+  font-size: 0.75rem; font-weight: 700; text-align: center; vertical-align: 0.1em;
+}
+
+.pill {
+  display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
+  background: var(--silver); color: var(--navy); white-space: nowrap;
+}
+.pill--received            { background: #fdeaec; color: var(--red-dark); }
+.pill--in_review           { background: #fdf6e4; color: #7a5b16; }
+.pill--interview_scheduled { background: #e7eef8; color: var(--honor-blue); }
+.pill--interviewed         { background: #e7eef8; color: var(--honor-blue); }
+.pill--onboarding          { background: #eef4ee; color: var(--green); }
+.pill--active              { background: var(--green); color: var(--white); }
+.pill--on_hold             { background: var(--silver); color: var(--steel-text); }
+.pill--withdrawn,
+.pill--declined            { background: #e6e8ea; color: var(--steel-text); }
+
+.totp-secret code {
+  display: block; padding: 0.7rem; background: var(--cloud);
+  border: 1px solid var(--silver); border-radius: var(--radius);
+  font-size: 1.05rem; letter-spacing: 0.12em; word-break: break-all;
+}
+
+.sig-view { max-width: 100%; border: 1px solid var(--silver); border-radius: var(--radius); background: var(--white); }
+
+@media (max-width: 48rem) {
+  .app-table-wrap { overflow-x: auto; }
+}

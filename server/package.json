@@ -1,0 +1,21 @@
+{
+  "name": "mission-earned-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mission Earned Veteran Resource Network — volunteer intake API, staff review portal and candidate case portal.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": { "node": ">=22 <23" },
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node src/migrate.js",
+    "createstaff": "node src/scripts/create-staff.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "express": "^5.1.0",
+    "nodemailer": "^10.0.9",
+    "pg": "^8.16.0"
+  }
+}

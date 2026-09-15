@@ -1,0 +1,104 @@
+/* Candidate portal. Built on the site's design system; only what the portal
+   adds lives here. */
+
+.portal-bar {
+  background: var(--navy);
+  color: var(--white);
+  padding-block: 0.9rem;
+}
+.portal-bar__inner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.portal-bar__brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.portal-bar__meta { font-size: 0.85rem; color: var(--silver); }
+
+.measure-wide { max-width: 44rem; }
+.portal-sub { color: var(--steel-text); margin-top: -0.4rem; }
+
+.portal-status { border-left: 4px solid var(--red); }
+.portal-status h2 { margin: 0.2rem 0 0.4rem; }
+
+.portal-section { margin-top: 2rem; }
+.portal-section > h2 {
+  font-size: 1.1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--navy);
+  margin-bottom: 1rem;
+}
+
+.portal-task { margin-bottom: 1rem; }
+.portal-task h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+
+.portal-file {
+  display: block;
+  width: 100%;
+  padding: 0.7rem;
+  border: 2px dashed var(--silver);
+  border-radius: var(--radius);
+  background: var(--white);
+}
+.portal-file:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+
+.portal-thread { list-style: none; margin: 0 0 1.5rem; padding: 0; }
+.portal-msg {
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.7rem;
+  background: var(--cloud);
+  border: 1px solid var(--silver);
+}
+/* A message from staff and a message from the applicant must be tellable
+   apart by more than colour alone, so each is labelled and offset. */
+.portal-msg--them { background: #eef2f6; border-left: 4px solid var(--navy); }
+.portal-msg--you  { background: var(--white); border-left: 4px solid var(--red); margin-left: 1.5rem; }
+.portal-msg__who {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--navy);
+}
+.portal-msg__when { font-weight: 400; color: var(--steel-text); margin-left: 0.5rem; }
+.portal-msg__body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.portal-docs { list-style: none; margin: 0; padding: 0; }
+.portal-docs li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--silver);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.8rem;
+  align-items: baseline;
+}
+.portal-docs a { font-weight: 700; overflow-wrap: anywhere; }
+
+.portal-doc {
+  max-height: 26rem;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+.portal-doc p { margin: 0 0 0.8rem; }
+.portal-sign { margin-top: 1.25rem; }
+.portal-sign .choice { margin: 1rem 0; }
+
+.portal-signout { margin-top: 2.5rem; }
+
+.portal-foot {
+  border-top: 1px solid var(--silver);
+  margin-top: 3rem;
+  padding-block: 1.5rem;
+  font-size: 0.9rem;
+}
+.portal-foot .fine-print { color: var(--steel-text); font-size: 0.82rem; margin-top: 0.5rem; }
+
+@media (max-width: 30rem) {
+  .portal-msg--you { margin-left: 0.5rem; }
+}
