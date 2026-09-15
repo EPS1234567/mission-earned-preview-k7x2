@@ -101,8 +101,9 @@ organisation's. Steps only the owner can do are marked **(owner)**.
      --email you@missionearned.org --name "Your Name" --role admin
    ```
 
-   Sign in at `/staff/`. An admin account must enrol an authenticator app on
-   first sign-in.
+   Sign in at `/staff/`. Every account must enrol an authenticator app on first
+   sign-in — reviewers download decrypted documents, so a password alone is not
+   enough for any role.
 
 10. **Point the form at it.** In the marketing site, set `apiBase` in
     `assets/js/config.js` to the service URL, and add that origin to

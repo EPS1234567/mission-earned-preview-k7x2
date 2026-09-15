@@ -121,9 +121,12 @@ export const config = {
     email: process.env.ORG_EMAIL || "info@missionearned.org",
   },
 
-  /* Admin accounts are required to carry a second factor. Set to "false" only
-     for a first-run bootstrap, and turn it back on. */
-  requireTotpForAdmin: process.env.REQUIRE_TOTP_FOR_ADMIN !== "false",
+  /* Every staff account carries a second factor, not just administrators: a
+     reviewer can download a decrypted DD-214, so a password alone is not
+     "MFA on accounts with access to health information" in the language any
+     insurer or auditor uses. Set to "false" only to recover a locked-out
+     account, and turn it straight back on. */
+  requireTotp: process.env.REQUIRE_TOTP !== "false",
 };
 
 export default config;

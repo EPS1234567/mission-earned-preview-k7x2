@@ -53,11 +53,10 @@ export async function revokeStaffSession(req, res) {
   clearCookie(res, CSRF_COOKIE);
 }
 
-/* Second factor is required for administrators — they are the accounts that
-   can export in bulk and read the audit log. */
+/* Every staff account needs a second factor. Reviewers read cases and download
+   decrypted documents; that is the access worth protecting, not the job title. */
 function needsTotp(session) {
-  if (!config.requireTotpForAdmin) return false;
-  if (session.role !== "admin") return false;
+  if (!config.requireTotp) return false;
   return !session.totp_verified;
 }
 

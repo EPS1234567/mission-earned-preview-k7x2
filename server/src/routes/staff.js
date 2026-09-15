@@ -66,9 +66,9 @@ staffRouter.post("/login", async (req, res, next) => {
 
     await query("UPDATE staff SET failed_logins = 0, locked_until = NULL, last_login_at = now() WHERE id = $1", [user.id]);
 
-    /* An administrator's session does not count as fully authenticated until a
-       second factor is presented. Everyone else is done here. */
-    const totpRequired = config.requireTotpForAdmin && user.role === "admin";
+    /* No staff session counts as fully authenticated until a second factor is
+       presented, whatever the role. */
+    const totpRequired = config.requireTotp;
     const sessionId = await createStaffSession(res, user.id, req, { totpVerified: !totpRequired });
     issueCsrf(res, sessionId);
 
@@ -115,7 +115,7 @@ staffRouter.get("/me", async (req, res, next) => {
     res.json({
       user: { id: session.staff_id, name: session.name, email: session.email, role: session.role },
       totp: {
-        required: config.requireTotpForAdmin && session.role === "admin",
+        required: config.requireTotp,
         enrolled: session.totp_confirmed,
         verified: session.totp_verified,
       },
