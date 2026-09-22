@@ -34,7 +34,7 @@ publicRouter.use((req, res, next) => {
 publicRouter.post("/applications", async (req, res, next) => {
   try {
     const ip = clientIp(req);
-    const limit = await rateLimit(`apply:${ip}`, 10, 60 * 60 * 1000);
+    const limit = await rateLimit(`apply:${ip || "unknown"}`, 10, 60 * 60 * 1000);
     if (!limit.allowed) {
       return res.status(429).json({
         error: "rate_limited",

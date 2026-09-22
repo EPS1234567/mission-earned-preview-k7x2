@@ -3,7 +3,8 @@
  * Both degrade honestly. The signature is drawn on a canvas and stored as a
  * PNG data URL in a hidden field so it travels with the rest of the form.
  * Strokes are kept as points, not just pixels, so a rotation or resize
- * re-draws them at the new size instead of stretching a stale bitmap.
+ * re-fits them to the new pad instead of stretching or cutting off a stale
+ * bitmap.
  * Anyone who can't draw — keyboard, screen reader, no pointer — can type
  * their name instead and still sign.
  * The résumé field reports the chosen file by name; whether the file itself is
@@ -67,14 +68,28 @@
        re-draw the recorded strokes after any resize. */
     function fit() {
       var rect = canvas.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
+      /* A hidden pad has no size; leave the strokes and the saved value be. */
+      if (!rect.width || !rect.height) return false;
       var dpr = window.devicePixelRatio || 1;
+      /* The pad changed size (a rotated phone, a narrowed window): re-fit
+         the recorded strokes to the new box so nothing drawn is cut off. */
+      if (width && height && (rect.width !== width || rect.height !== height)) {
+        var sx = rect.width / width;
+        var sy = rect.height / height;
+        strokes.forEach(function (pts) {
+          pts.forEach(function (p) {
+            p.x *= sx;
+            p.y *= sy;
+          });
+        });
+      }
       width = rect.width;
       height = rect.height;
       canvas.width = Math.round(rect.width * dpr);
       canvas.height = Math.round(rect.height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       redraw();
+      return true;
     }
     fit();
 
@@ -82,8 +97,7 @@
     window.addEventListener("resize", function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
-        fit();
-        save();
+        if (fit()) save();
       }, 200);
     });
 
@@ -129,32 +143,12 @@
       save();
     }
 
-    /* The browser cancels a gesture either because it claimed it for
-       scrolling, or because something interrupted the applicant mid-stroke.
-       A stroke long enough to be writing is kept — an interrupted signature
-       must never be thrown away. A brief flick is the applicant scrolling
-       past the pad, and is dropped rather than saved as their signature. */
+    /* The browser interrupted the gesture (a call, a system gesture, a
+       rotation mid-stroke). Whatever was drawn is kept: an interrupted
+       signature must never be thrown away, and the pad never hands a touch
+       to the page (touch-action: none), so a cancel is never a scroll. */
     function cancel() {
-      if (!drawing) return;
-      drawing = false;
-      var stroke = current;
-      current = null;
-      if (stroke && !looksLikeWriting(stroke)) {
-        var at = strokes.indexOf(stroke);
-        if (at !== -1) strokes.splice(at, 1);
-        redraw();
-      }
-      save();
-    }
-
-    function looksLikeWriting(pts) {
-      if (pts.length < 5) return false;
-      var minX = Infinity, maxX = -Infinity;
-      for (var i = 0; i < pts.length; i++) {
-        if (pts[i].x < minX) minX = pts[i].x;
-        if (pts[i].x > maxX) maxX = pts[i].x;
-      }
-      return maxX - minX >= 12;
+      end();
     }
 
     /* Leaving the pad mid-stroke ends that stroke, so coming back doesn't
@@ -195,6 +189,20 @@
         save();
       });
     }
+
+    /* Coming back to the page (browser Back, a restored tab) can put the
+       typed name back in its box while the pad starts blank. Adopt it, so a
+       name the applicant already typed is not silently lost. */
+    function adoptTyped() {
+      if (!typed) return;
+      var value = typed.value.trim();
+      if (!value || strokes.length) return;
+      typedText = value;
+      redraw();
+      save();
+    }
+    adoptTyped();
+    window.addEventListener("pageshow", adoptTyped);
 
     function clearPad() {
       strokes = [];
@@ -268,7 +276,14 @@
     }
 
     input.addEventListener("change", function () {
-      handle(input.files && input.files[0]);
+      /* Cancelling the picker clears the selection in most browsers. The
+         readout and the recorded name follow the real selection, so a file
+         that is no longer attached is never shown or filed. */
+      if (!input.files || !input.files.length) {
+        clearZone();
+        return;
+      }
+      handle(input.files[0]);
     });
 
     ["dragenter", "dragover"].forEach(function (evt) {

@@ -348,7 +348,8 @@ p {
 }
 .site-header__brand {
   text-decoration: none;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 .logo-lockup {
   display: inline-flex;
@@ -425,11 +426,18 @@ p {
 }
 .site-nav__toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: 0;
   color: var(--navy);
   padding: 0.5rem;
   cursor: pointer;
+  /* Never let the brand lockup squeeze the menu button away: on a 360px
+     phone it used to render 0px wide and the menu looked like it was gone. */
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
 }
 .site-nav__toggle-close {
   display: none;
@@ -439,6 +447,16 @@ p {
 }
 .site-nav__toggle[aria-expanded="true"] .site-nav__toggle-close {
   display: inline;
+}
+/* On the narrowest phones the descriptor line is what forces the lockup wide
+   enough to crowd the menu button; the wordmark carries the brand alone. */
+@media (max-width: 25em) {
+  .site-header__inner {
+    gap: 0.5rem;
+  }
+  .site-header__brand .logo-descriptor {
+    display: none;
+  }
 }
 
 @media (max-width: 63.999em) {
@@ -1776,13 +1794,24 @@ fieldset.agreements {
   border: 1px solid var(--silver);
   border-radius: var(--radius);
   background: var(--white);
-  touch-action: pan-y;
+  /* The pad owns every touch that starts on it. With pan-y the browser
+     claimed any stroke that began vertically (an l, a J, an M) as a page
+     scroll and threw the ink away; the pad is short enough that the page
+     scrolls from anywhere else. */
+  touch-action: none;
   cursor: crosshair;
   display: block;
 }
 .sig-pad:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
+}
+/* A missing signature is flagged on the pad itself: after a tap, programmatic
+   focus never shows a ring, and the message sits below the pad. */
+.sig-pad[data-invalid="true"] {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+  border-color: var(--red);
 }
 .sig-x {
   position: absolute;
@@ -1974,7 +2003,7 @@ fieldset.agreements {
   border: 1px solid var(--silver);
   border-radius: var(--radius);
   font-family: var(--font-body);
-  font-size: 0.92rem;
+  font-size: 1rem;
   background: var(--white);
   color: var(--text);
 }
@@ -2059,6 +2088,11 @@ fieldset.agreements {
 .btn--xs {
   padding: 0.35rem 0.75rem;
   font-size: 0.75rem;
+}
+@media (pointer: coarse) {
+  .btn--xs {
+    min-height: 44px;
+  }
 }
 
 .admin-empty {

@@ -1,5 +1,6 @@
 /* Response headers, cookies, CSRF and rate limiting. */
 import crypto from "node:crypto";
+import { isIP } from "node:net";
 import config from "../config.js";
 import { hmac, timingSafeEqualStr } from "./crypto.js";
 import { query } from "../db.js";
@@ -126,8 +127,13 @@ export async function rateLimit(bucket, limit, windowMs) {
   return { allowed: row.count <= limit, count: row.count, resetAt: row.reset_at };
 }
 
+/* The address Express derived under "trust proxy" (see index.js). Behind the
+   single Railway edge that is the entry the edge appended, never the leftmost
+   X-Forwarded-For value, which the client writes itself: reading that let one
+   host rotate the header and walk straight past every per-IP limit. A value
+   that is not an address (some corporate proxies send "unknown") becomes
+   null rather than a failed inet insert that loses the application. */
 export function clientIp(req) {
-  const fwd = req.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.socket?.remoteAddress || null;
+  const ip = req.ip || req.socket?.remoteAddress || null;
+  return ip && isIP(ip) ? ip : null;
 }

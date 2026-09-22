@@ -176,6 +176,7 @@
       <input type="hidden" name="to_email" value="info@missionearned.org">
       
       <noscript>
+        <style>form[data-validate] [type="submit"] { display: none; }</style>
         <p class="form-status form-status--error is-visible" role="alert">
           This application needs JavaScript turned on to send. If you can't turn it on, call us at
           <a href="tel:+18336746387">(833) 674-6387</a> and we'll take your application over the phone.
@@ -766,6 +767,7 @@
                 <canvas class="sig-pad" id="signature-pad" tabindex="0" role="img" data-signature="" aria-labelledby="signature-label" aria-describedby="signature-help"></canvas>
                 <span class="sig-x" aria-hidden="true">X</span>
               </div>
+              <p class="field__error" id="signature-error" aria-live="polite"></p>
               <div class="sig-actions">
                 <span class="sig-hint" id="signature-help">Draw with your mouse or finger, or type your name below.</span>
                 <button class="sig-clear" type="button" data-signature-clear="">Clear</button>
