@@ -35,7 +35,7 @@ staffRouter.post("/login", async (req, res, next) => {
 
     /* Limit by account and by source, so neither a single account nor a single
        host can be ground down. */
-    const byIp = await rateLimit(`login:ip:${ip}`, 20, 15 * 60 * 1000);
+    const byIp = await rateLimit(`login:ip:${ip || "unknown"}`, 20, 15 * 60 * 1000);
     const byAccount = await rateLimit(`login:acct:${email}`, 8, 15 * 60 * 1000);
     if (!byIp.allowed || !byAccount.allowed) {
       await audit({ actorType: "staff", actorId: email, action: "login.rate_limited", ip });

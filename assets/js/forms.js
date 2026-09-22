@@ -115,9 +115,18 @@
     return label + " is required.";
   }
 
+  /* A hidden control that fronts a visible one (the signature pad) shows its
+     state on that visible control, or a phone in landscape sees nothing. */
+  function focusTarget(input) {
+    if (!input.dataset.focusTarget) return null;
+    return document.querySelector(input.dataset.focusTarget);
+  }
+
   function setError(input, message) {
     var err = errorEl(input);
+    var target = focusTarget(input);
     input.setAttribute("aria-invalid", "true");
+    if (target) target.setAttribute("data-invalid", "true");
     if (err) {
       err.textContent = message;
       err.classList.add("is-visible");
@@ -127,7 +136,9 @@
 
   function clearError(input) {
     var err = errorEl(input);
+    var target = focusTarget(input);
     input.removeAttribute("aria-invalid");
+    if (target) target.removeAttribute("data-invalid");
     if (err) {
       err.textContent = "";
       err.classList.remove("is-visible");
@@ -222,7 +233,8 @@
   }
 
   /* One pass in document order, so the control we focus really is the first
-     broken one on the page — radio groups included. */
+     broken one on the page — radio groups included. Returns the control to
+     take the applicant to, or null when everything passed. */
   function validateForm(form) {
     var firstInvalid = null;
     var seenRadio = {};
@@ -245,13 +257,7 @@
     });
 
     if (firstInvalid) {
-      if (firstInvalid.type === "hidden" && firstInvalid.dataset.focusTarget) {
-        var proxy = document.querySelector(firstInvalid.dataset.focusTarget);
-        if (proxy) firstInvalid = proxy;
-      }
-      firstInvalid.focus({ preventScroll: true });
-      scrollTo(firstInvalid);
-      return false;
+      return focusTarget(firstInvalid) || firstInvalid;
     }
 
     /* Everything was checked trimmed, so store it trimmed too rather than
@@ -263,7 +269,12 @@
         if (input.value !== trimmed) input.value = trimmed;
       }
     );
-    return true;
+    return null;
+  }
+
+  function goTo(el) {
+    el.focus({ preventScroll: true });
+    scrollTo(el);
   }
 
   /* `scroll` is opt-in: when a field-level error already owns the scroll,
@@ -431,21 +442,27 @@
 
   /* A signature can't be dated in the future, and a start date can't be in
      the past. Bounds are stamped at load so the native picker enforces them
-     too, not just our check. */
-  (function () {
+     too, not just our check; the signature date is prefilled with today. Only
+     an empty date is filled, so a date the applicant chose is never touched. */
+  function stampDateBounds(root) {
     var now = new Date();
     var today =
       now.getFullYear() + "-" +
       String(now.getMonth() + 1).padStart(2, "0") + "-" +
       String(now.getDate()).padStart(2, "0");
-    document.querySelectorAll("[data-max-today]").forEach(function (el) {
+    root.querySelectorAll("[data-max-today]").forEach(function (el) {
       el.max = today;
       if (!el.value) el.value = today;
     });
-    document.querySelectorAll("[data-min-today]").forEach(function (el) {
+    root.querySelectorAll("[data-min-today]").forEach(function (el) {
       el.min = today;
     });
-  })();
+  }
+  stampDateBounds(document);
+  /* Browser Back can restore an emptied field after load. */
+  window.addEventListener("pageshow", function () {
+    stampDateBounds(document);
+  });
 
   /* Send the application to the Mission Earned service, when one is named in
    * assets/js/config.js. multipart/form-data so an attached resume travels
@@ -508,6 +525,29 @@
       return form.dataset.submitted === "true";
     }
 
+    /* While the Submit button is being pressed, a blur must not validate:
+       revealing an error line shifts the button out from under the pointer
+       before the click lands, and the press reads as a dead button. Submit
+       checks every field anyway. */
+    var submitButton = form.querySelector('[type="submit"]');
+    var pressingSubmit = false;
+    var pressTimer;
+    var pressEnd = function () {
+      clearTimeout(pressTimer);
+      pressingSubmit = false;
+    };
+    var pressStart = function () {
+      pressingSubmit = true;
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(pressEnd, 1500);
+    };
+    if (submitButton) {
+      submitButton.addEventListener("pointerdown", pressStart);
+      submitButton.addEventListener("mousedown", pressStart);
+      document.addEventListener("pointerup", pressEnd);
+      document.addEventListener("mouseup", pressEnd);
+    }
+
     /* A control speaks up only once the applicant has used it, or once they
        have pressed Submit. */
     form.addEventListener(
@@ -516,7 +556,11 @@
         var t = e.target;
         if (!t.matches || !t.matches("input, select, textarea")) return;
         if (t.type === "radio" || t.name === "botcheck") return;
+        /* The typed-name box is a way of signing, not a field of its own:
+           its errors belong to the signature, which re-checks itself. */
+        if (t.hasAttribute("data-signature-typed")) return;
         if (!live() && t.dataset.touched !== "true") return;
+        if (pressingSubmit || (e.relatedTarget && e.relatedTarget === submitButton)) return;
         validateInput(t);
       },
       true
@@ -525,6 +569,7 @@
     function touch(e) {
       var t = e.target;
       if (!t.matches || !t.matches("input, select, textarea") || t.name === "botcheck") return;
+      if (t.hasAttribute("data-signature-typed")) return;
       t.dataset.touched = "true";
 
       /* Clear a standing error the moment it is fixed. Before the first
@@ -552,13 +597,17 @@
 
       form.dataset.submitted = "true";
 
-      if (!validateForm(form)) {
+      var broken = validateForm(form);
+      if (broken) {
+        /* Banner first, then the scroll: the banner takes up room above the
+           fields, so the scroll target is measured after it appears. */
         showStatus(
           form,
           "error",
           "Please fix the highlighted fields and try again. Your entries have been kept.",
           false
         );
+        goTo(broken);
         return;
       }
 
@@ -589,13 +638,28 @@
         );
       }
 
-      function finish(delivered, successMessage) {
-        form.dataset.busy = "false";
+      /* A second press right after a success (a double-click, or a re-tap
+         because nothing seemed to happen) must not re-check the freshly
+         emptied form and paint it red under the "received" banner. The
+         button reads normally again at once; the guard lifts shortly after. */
+      var settleTimer;
+      function settle() {
+        form.dataset.busy = "true";
         setBusy(form, false);
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(function () {
+          form.dataset.busy = "false";
+        }, 1500);
+      }
+
+      function finish(delivered, successMessage) {
         if (delivered) {
+          settle();
           resetForm(form);
           showStatus(form, "success", successMessage, true);
         } else {
+          form.dataset.busy = "false";
+          setBusy(form, false);
           showStatus(
             form,
             "error",
@@ -612,9 +676,8 @@
         form.dataset.busy = "true";
         setBusy(form, true);
         submitToApi(form, apiBase).then(function (result) {
-          form.dataset.busy = "false";
-          setBusy(form, false);
           if (result.ok) {
+            settle();
             resetForm(form);
             showStatus(
               form,
@@ -625,6 +688,8 @@
             );
             return;
           }
+          form.dataset.busy = "false";
+          setBusy(form, false);
           /* Every failure keeps every answer on the page. */
           if (result.reason === "validation" && result.errors.length && applyServerErrors(form, result.errors)) {
             showStatus(form, "error", "Please fix the highlighted fields and try again. Your entries have been kept.", false);
@@ -699,6 +764,7 @@
        untouched, so the empty fields don't immediately turn red. */
     function resetForm(f) {
       f.reset();
+      stampDateBounds(f);
       f.dataset.submitted = "false";
       f.querySelectorAll("input, select, textarea").forEach(function (el) {
         delete el.dataset.touched;

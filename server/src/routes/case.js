@@ -46,7 +46,7 @@ function issueCsrfCookie(res, sessionKey) {
 caseRouter.get("/enter", async (req, res, next) => {
   try {
     res.setHeader("Referrer-Policy", "no-referrer");
-    const limit = await rateLimit(`case-enter:${clientIp(req)}`, 30, 15 * 60 * 1000);
+    const limit = await rateLimit(`case-enter:${clientIp(req) || "unknown"}`, 30, 15 * 60 * 1000);
     if (!limit.allowed) return res.status(429).send(page({
       title: "Too many attempts", heading: "Too many attempts",
       body: notice("error", `Please wait a few minutes, or call ${config.org.phone}.`),
