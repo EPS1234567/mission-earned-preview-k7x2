@@ -165,7 +165,7 @@
       <h2>Volunteer Application</h2>
     </div>
 
-    <form data-validate="" data-mode="web3forms" data-phone="(833) 674‑6387" data-email="info@missionearned.org" data-sheet-name="Volunteer Applications" data-demo-capture="" data-demo-message="Application received — thank you! It is now visible in the staff review portal." data-success-message="Thank you for your interest in volunteering with Mission Earned! Your application was received and we'll be in touch soon." novalidate="">
+    <form method="post" data-validate="" data-mode="web3forms" data-phone="(833) 674‑6387" data-email="info@missionearned.org" data-sheet-name="Volunteer Applications" data-demo-capture="" data-demo-message="Application received — thank you! It is now visible in the staff review portal." data-success-message="Thank you for your interest in volunteering with Mission Earned! Your application was received and we'll be in touch soon." novalidate="">
       
 
 <div class="hp-field" aria-hidden="true">
@@ -175,6 +175,12 @@
       <input type="hidden" name="subject" value="New volunteer application — missionearned.org">
       <input type="hidden" name="to_email" value="info@missionearned.org">
       
+      <noscript>
+        <p class="form-status form-status--error is-visible" role="alert">
+          This application needs JavaScript turned on to send. If you can't turn it on, call us at
+          <a href="tel:+18336746387">(833) 674-6387</a> and we'll take your application over the phone.
+        </p>
+      </noscript>
 <p class="form-status" role="status" aria-live="polite"></p>
 
 
@@ -262,7 +268,7 @@
   <label class="field__label" for="state">State <span class="req" aria-hidden="true">*</span></label>
   <select id="state" name="state" required="" aria-required="true" autocomplete="address-level1">
     <option value="">Select</option>
-    <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option><option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option><option value="CT">CT</option><option value="DE">DE</option><option value="DC">DC</option><option value="FL">FL</option><option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option><option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option><option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option><option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option><option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option><option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option><option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option><option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option><option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option><option value="OR">OR</option><option value="PA">PA</option><option value="PR">PR</option><option value="RI">RI</option><option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option><option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option><option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option><option value="WI">WI</option><option value="WY">WY</option>
+    <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option><option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option><option value="CT">CT</option><option value="DE">DE</option><option value="DC">DC</option><option value="FL">FL</option><option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option><option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option><option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option><option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option><option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option><option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option><option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option><option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option><option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option><option value="OR">OR</option><option value="PA">PA</option><option value="PR">PR</option><option value="RI">RI</option><option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option><option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option><option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option><option value="WI">WI</option><option value="WY">WY</option><option value="AA">AA (Armed Forces Americas)</option><option value="AE">AE (Armed Forces Europe)</option><option value="AP">AP (Armed Forces Pacific)</option><option value="AS">AS (American Samoa)</option><option value="GU">GU (Guam)</option><option value="MP">MP (Northern Mariana Islands)</option><option value="VI">VI (U.S. Virgin Islands)</option>
   </select>
   
   <p class="field__error" aria-live="polite"></p>
@@ -563,7 +569,7 @@
 
 <div class="field ">
   <label class="field__label" for="start_date">Preferred Start Date</label>
-  <input type="date" id="start_date" name="start_date">
+  <input type="date" id="start_date" name="start_date" data-min-today="">
   
   <p class="field__error" aria-live="polite"></p>
 </div>
@@ -694,28 +700,44 @@
 
             <h3>Agreements</h3>
           </div>
-          <div class="agreements">
-            <label class="choice">
-              <input type="checkbox" name="agree_age" required="" aria-required="true" value="Confirmed at least 18 years old">
-              <span>I am at least 18 years old. <span class="req" aria-hidden="true">*</span></span>
-            </label>
-            <label class="choice">
-              <input type="checkbox" name="agree_review" required="" aria-required="true" value="Understands review does not guarantee placement">
-              <span>I understand that my application will be reviewed and does not guarantee a volunteer position. <span class="req" aria-hidden="true">*</span></span>
-            </label>
-            <label class="choice">
-              <input type="checkbox" name="agree_screening" required="" aria-required="true" value="Willing to complete interview, background check, and training">
-              <span>I am willing to complete an interview, background check (if required), and any necessary onboarding or training. <span class="req" aria-hidden="true">*</span></span>
-            </label>
-            <label class="choice">
-              <input type="checkbox" name="agree_assignment" required="" aria-required="true" value="Understands assignments are based on need and fit">
-              <span>I understand that volunteer assignments are based on organizational needs and a good fit for both the applicant and Mission Earned. <span class="req" aria-hidden="true">*</span></span>
-            </label>
-            <label class="choice">
-              <input type="checkbox" name="agree_accurate" required="" aria-required="true" value="Confirms information is accurate">
-              <span>I agree that all information provided is accurate to the best of my knowledge. <span class="req" aria-hidden="true">*</span></span>
-            </label>
-          </div>
+          <fieldset class="agreements">
+            <legend class="visually-hidden">Required agreements</legend>
+            <div class="field agreement">
+              <label class="choice">
+                <input type="checkbox" name="agree_age" required="" aria-required="true" value="Confirmed at least 18 years old" data-required-message="Please confirm you are at least 18 years old.">
+                <span>I am at least 18 years old. <span class="req" aria-hidden="true">*</span></span>
+              </label>
+              <p class="field__error" aria-live="polite"></p>
+            </div>
+            <div class="field agreement">
+              <label class="choice">
+                <input type="checkbox" name="agree_review" required="" aria-required="true" value="Understands review does not guarantee placement" data-required-message="Please confirm you understand your application will be reviewed.">
+                <span>I understand that my application will be reviewed and does not guarantee a volunteer position. <span class="req" aria-hidden="true">*</span></span>
+              </label>
+              <p class="field__error" aria-live="polite"></p>
+            </div>
+            <div class="field agreement">
+              <label class="choice">
+                <input type="checkbox" name="agree_screening" required="" aria-required="true" value="Willing to complete interview, background check, and training" data-required-message="Please confirm you are willing to complete the interview and onboarding steps.">
+                <span>I am willing to complete an interview, background check (if required), and any necessary onboarding or training. <span class="req" aria-hidden="true">*</span></span>
+              </label>
+              <p class="field__error" aria-live="polite"></p>
+            </div>
+            <div class="field agreement">
+              <label class="choice">
+                <input type="checkbox" name="agree_assignment" required="" aria-required="true" value="Understands assignments are based on need and fit" data-required-message="Please confirm you understand how volunteer assignments are made.">
+                <span>I understand that volunteer assignments are based on organizational needs and a good fit for both the applicant and Mission Earned. <span class="req" aria-hidden="true">*</span></span>
+              </label>
+              <p class="field__error" aria-live="polite"></p>
+            </div>
+            <div class="field agreement">
+              <label class="choice">
+                <input type="checkbox" name="agree_accurate" required="" aria-required="true" value="Confirms information is accurate" data-required-message="Please confirm the information you provided is accurate.">
+                <span>I agree that all information provided is accurate to the best of my knowledge. <span class="req" aria-hidden="true">*</span></span>
+              </label>
+              <p class="field__error" aria-live="polite"></p>
+            </div>
+          </fieldset>
         </div>
 
         
@@ -741,12 +763,16 @@
             <div class="field field--full">
               <span class="field__label" id="signature-label">Signature <span class="req" aria-hidden="true">*</span></span>
               <div class="sig-wrap">
-                <canvas class="sig-pad" id="signature-pad" tabindex="0" role="img" data-signature="" aria-labelledby="signature-label" aria-description="Draw your signature using a mouse, finger, or stylus."></canvas>
+                <canvas class="sig-pad" id="signature-pad" tabindex="0" role="img" data-signature="" aria-labelledby="signature-label" aria-describedby="signature-help"></canvas>
                 <span class="sig-x" aria-hidden="true">X</span>
               </div>
               <div class="sig-actions">
-                <span class="sig-hint">Draw with your mouse or finger.</span>
+                <span class="sig-hint" id="signature-help">Draw with your mouse or finger, or type your name below.</span>
                 <button class="sig-clear" type="button" data-signature-clear="">Clear</button>
+              </div>
+              <div class="sig-typed">
+                <label class="field__label" for="signature_typed">Or type your full name to sign</label>
+                <input type="text" id="signature_typed" name="signature_typed" data-signature-typed="" autocomplete="name" placeholder="Type your name here instead of drawing">
               </div>
               <input type="hidden" name="signature" data-signature-value="" data-validate-hidden="" data-required="true" data-focus-target="#signature-pad">
               <p class="field__error" aria-live="polite"></p>
@@ -756,7 +782,7 @@
 
 <div class="field field--half field--row-start">
   <label class="field__label" for="signature_date">Date <span class="req" aria-hidden="true">*</span></label>
-  <input type="date" id="signature_date" name="signature_date" required="" aria-required="true">
+  <input type="date" id="signature_date" name="signature_date" required="" aria-required="true" data-max-today="">
   
   <p class="field__error" aria-live="polite"></p>
 </div>
@@ -895,6 +921,7 @@
   </div>
 </footer>
 
+  <script src="/mission-earned-preview-k7x2/assets/js/config.js" defer=""></script>
   <script src="/mission-earned-preview-k7x2/assets/js/main.js" defer=""></script>
   
   <script src="/mission-earned-preview-k7x2/assets/js/forms.js" defer=""></script>
