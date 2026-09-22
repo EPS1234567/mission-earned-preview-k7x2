@@ -165,7 +165,7 @@
       <h2>Volunteer Application</h2>
     </div>
 
-    <form data-validate="" data-mode="web3forms" data-phone="(833) 674‑6387" data-email="info@missionearned.org" data-sheet-name="Volunteer Applications" data-demo-capture="" data-demo-message="Application received — thank you! It is now visible in the staff review portal." data-success-message="Thank you for your interest in volunteering with Mission Earned! Your application was received and we'll be in touch soon." novalidate="">
+    <form method="post" data-validate="" data-mode="web3forms" data-phone="(833) 674‑6387" data-email="info@missionearned.org" data-sheet-name="Volunteer Applications" data-demo-capture="" data-demo-message="Application received — thank you! It is now visible in the staff review portal." data-success-message="Thank you for your interest in volunteering with Mission Earned! Your application was received and we'll be in touch soon." novalidate="">
       
 
 <div class="hp-field" aria-hidden="true">
@@ -175,6 +175,12 @@
       <input type="hidden" name="subject" value="New volunteer application — missionearned.org">
       <input type="hidden" name="to_email" value="info@missionearned.org">
       
+      <noscript>
+        <p class="form-status form-status--error is-visible" role="alert">
+          This application needs JavaScript turned on to send. If you can't turn it on, call us at
+          <a href="tel:+18336746387">(833) 674-6387</a> and we'll take your application over the phone.
+        </p>
+      </noscript>
 <p class="form-status" role="status" aria-live="polite"></p>
 
 
